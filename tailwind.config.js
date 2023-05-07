@@ -21,6 +21,9 @@ export default {
         mono: ["Fira Code", ...defaultTheme.fontFamily.mono],
         inter: ["Inter", "san serif"],
       },
+      fontSize: {
+        md: "20px",
+      },
     },
   },
   plugins: [typography, scrollbar, aspectRatio],

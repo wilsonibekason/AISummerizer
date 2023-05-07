@@ -1,14 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { copy, linkIcon } from "../assets";
-
+import { useLazyGetSummaryQuery } from "../services/article";
+interface IArticle {
+  url: string;
+  summary: string;
+}
 const Demo = () => {
-  const [article, setArticle] = useState({
+  const [article, setArticle] = useState<IArticle>({
     url: "",
     summary: "",
   });
+  const [allArticles, setAllArticles] = useState<IArticle[]>([]);
+  const [getSummary, { error, isFetching }] = useLazyGetSummaryQuery();
+  React.useEffect(() => {
+    const articlesFromLocalStorage = JSON.parse(
+      localStorage.getItem("articles") as string
+    );
 
-  const handleSubmit = () => {
-    alert("Submitted");
+    if (articlesFromLocalStorage) {
+      setAllArticles(articlesFromLocalStorage);
+    }
+  }, []);
+  const handleSubmit = async (e: Event) => {
+    e.preventDefault();
+    const { data } = await getSummary({ articleUrl: article.url });
+    if (data) {
+      const newArticle: IArticle = { ...article, summary: data.summary };
+      const updatedAllArticles = [newArticle, ...allArticles];
+      setArticle(newArticle);
+      setAllArticles(updatedAllArticles);
+      console.table(newArticle);
+      localStorage.setItem("articles", JSON.stringify(allArticles));
+    }
+    isFetching && console.log("Fetching");
+    error && console.error(error);
+
+    // return Promise.resolve();
   };
   return (
     <section className="mt-16 w-full max-w-full">
